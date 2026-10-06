@@ -1,6 +1,8 @@
 # BetterCharacterStats for Turtle WoW
 This addon shows your character stats that are not present in default UI.<br>
 This version is designed specifically for TurtleWoW and its custom changes.
+Requires ClassicAPI aura lookup and timer APIs, verified on ClassicAPI 1.15.16. Aura bursts share one deferred refresh; equipment is scanned once per statistics update. Required API checks preserve the native statistics panel when the extension is unavailable.
+
 ## Features
  - Base stats: strength, agility, stamina, intellect, spirit, armor
  - Melee/Ranged: weapon skill, damage, attack speed, attack power, hit, crit

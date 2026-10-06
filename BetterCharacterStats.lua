@@ -10,10 +10,55 @@ L = BCS.L
 local inventoryDebounceTimer = 0
 local inventoryDebouncePending = false
 
+local function UpdateInventoryDebounce()
+    inventoryDebounceTimer = inventoryDebounceTimer - arg1
+    if inventoryDebounceTimer > 0 then return end
+    inventoryDebouncePending = false
+    BCSFrame:SetScript("OnUpdate", nil)
+    BCS.needScanGear = true
+    BCS.needScanSkills = true
+    if PaperDollFrame:IsVisible() then
+        BCS:UpdateStats()
+    else
+        BCS.needUpdate = true
+    end
+end
+
 -- Tree of Life aura bonus from other players, your own is calculated in GetHealingPower()
 local aura = .0
 local playerName = UnitName("player")
 local _, playerClass = UnitClass("player")
+
+-- Tree presence must come from current auras, not a previous statistics scan.
+local function HasTreeAura()
+    return C_UnitAuras.GetAuraDataBySpellName("player", L["Tree of Life Aura"], "HELPFUL") ~= nil
+end
+
+local auraUpdateTimer
+local function FlushAuraUpdate()
+    if auraUpdateTimer then auraUpdateTimer:Cancel(); auraUpdateTimer = nil end
+    if not HasTreeAura() then
+        aura = 0
+    elseif GetNumPartyMembers() + GetNumRaidMembers() > 0 then
+        SendAddonMessage("bcs", "TREE," .. playerName, "PARTY")
+    end
+    if PaperDollFrame:IsVisible() then
+        BCS.needUpdate = false
+        BCS:UpdateStats()
+    else
+        BCS.needUpdate = true
+    end
+end
+
+local function QueueAuraUpdate()
+    if not auraUpdateTimer then
+        local timer
+        timer = C_Timer.NewTimer(0, function()
+            if auraUpdateTimer == timer then FlushAuraUpdate() end
+        end)
+        auraUpdateTimer = timer
+    end
+end
 
 BCS.PLAYERSTAT_DROPDOWN_OPTIONS = {
 	"PLAYERSTAT_BASE_STATS",
@@ -68,6 +113,7 @@ function BCS:Print(message)
 end
 
 function BCS:OnLoad()
+    if not BCS_EngineReady then BCSFrame:Hide(); return end
 	CharacterAttributesFrame:Hide()
 	PaperDollFrame:UnregisterEvent("UNIT_DAMAGE")
 	PaperDollFrame:UnregisterEvent("PLAYER_DAMAGE_DONE_MODS")
@@ -85,28 +131,13 @@ function BCS:OnLoad()
 	BCSFrame:RegisterEvent("CHAT_MSG_ADDON") -- needed to recieve aura bonuses from other people
 	BCS.needUpdate = false
 
-	-- OnUpdate for inventory debounce timer
-	BCSFrame:SetScript("OnUpdate", function()
-		if inventoryDebouncePending then
-			inventoryDebounceTimer = inventoryDebounceTimer - arg1
-			if inventoryDebounceTimer <= 0 then
-				inventoryDebouncePending = false
-				BCS.needScanGear = true
-				BCS.needScanSkills = true
-				if PaperDollFrame:IsVisible() then
-					BCS:UpdateStats()
-				else
-					BCS.needUpdate = true
-				end
-			end
-		end
-	end)
 	-- there is less space for player character model with this addon, shorten it slightly
 	CharacterModelFrame:SetHeight(CharacterModelFrame:GetHeight() - 19)
 end
 
 -- Scan stuff depending on event, but make sure to scan everything when addon is loaded
 function BCS:OnEvent()
+    if not BCS_EngineReady then return end
 	if BCS.Debug then
 		local t = {
 			E = event,
@@ -147,18 +178,8 @@ function BCS:OnEvent()
 		end
 	elseif event == "PLAYER_AURAS_CHANGED" then
 		BCS.needScanAuras = true
-		local hasTreeAura = BCS:GetPlayerAura(L["Tree of Life Aura"])
-		if not hasTreeAura then
-			aura = 0
-		else
-			SendAddonMessage("bcs", "TREE"..","..playerName, "PARTY")
-			--BCS:Print("sent tree request")
-		end
-		if PaperDollFrame:IsVisible() then
-			BCS:UpdateStats()
-		else
-			BCS.needUpdate = true
-		end
+		BCS.needUpdate = true
+        QueueAuraUpdate()
 	elseif event == "CHARACTER_POINTS_CHANGED" then
 		BCS.needScanTalents = true
 		if PaperDollFrame:IsVisible() then
@@ -177,6 +198,7 @@ function BCS:OnEvent()
 		-- Debounce: wait 200ms after last change before scanning
 		inventoryDebounceTimer = 0.2
 		inventoryDebouncePending = true
+		BCSFrame:SetScript("OnUpdate", UpdateInventoryDebounce)
 	elseif event == "ADDON_LOADED" and arg1 == "BetterCharacterStats" then
 		BCSFrame:UnregisterEvent("ADDON_LOADED")
 
@@ -195,12 +217,16 @@ function BCS:OnEvent()
 end
 
 function BCS:OnShow()
+    if not BCS_EngineReady then BCSFrame:Hide(); return end
 	-- Clear pending debounce and update immediately when panel opens
 	if inventoryDebouncePending then
 		inventoryDebouncePending = false
+		BCSFrame:SetScript("OnUpdate", nil)
+		BCS.needUpdate = true
 		BCS.needScanGear = true
 		BCS.needScanSkills = true
 	end
+    if auraUpdateTimer then FlushAuraUpdate() end
 	if BCS.needUpdate then
 		BCS.needUpdate = false
 		BCS:UpdateStats()
@@ -211,6 +237,7 @@ end
 local avgV = {}
 local avg = 0
 function BCS:UpdateStats()
+    if not BCS_EngineReady then return end
 	local beginTime
 	if BCS.Debug then
 		local e = event or "nil"

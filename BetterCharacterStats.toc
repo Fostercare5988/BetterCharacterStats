@@ -1,8 +1,10 @@
 ## Interface: 11200
+## X-ClassicAPI-Required-Capabilities: C_Timer.NewTimer, C_UnitAuras.GetAuraDataBySpellName
 ## Title: BetterCharacterStats 1.15.3
 ## Author: moh, Bennylava, Lexie, Spit, Pepopo, MarcelineVQ
 ## Version: 1.15.3
 ## Notes: Improved character statistics inside Character Info panel.
 ## SavedVariablesPerCharacter: BCSConfig
 
+Bootstrap.lua
 BetterCharacterStats.xml

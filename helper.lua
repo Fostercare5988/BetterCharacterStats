@@ -1204,9 +1204,6 @@ function BCS:RunScans()
 	if BCS.needScanTalents then
 		ScanAllTalents()
 	end
-	if BCS.needScanGear then
-		ScanAllGear()
-	end
 	if BCS.needScanAuras then
 		ScanAllAuras()
 	end
