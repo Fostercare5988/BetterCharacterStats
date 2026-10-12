@@ -1,6 +1,6 @@
-# BetterCharacterStats for Turtle WoW
+# BetterCharacterStats
 This addon shows your character stats that are not present in default UI.<br>
-This version is designed specifically for TurtleWoW and its custom changes.
+Includes Turtle WoW custom-stat support. Custom amounts still need verification on the deployed OctoWoW content.
 Requires ClassicAPI aura lookup and timer APIs, verified on ClassicAPI 1.15.16. Aura bursts share one deferred refresh; equipment is scanned once per statistics update. Required API checks preserve the native statistics panel when the extension is unavailable.
 
 ## Features
@@ -14,7 +14,7 @@ Requires ClassicAPI aura lookup and timer APIs, verified on ClassicAPI 1.15.16. 
 
 ## Installation
 1. Click Code -> Download ZIP
-2. Extract ZIP file into your Interface/AddOnns folder, remove ``-main``
+2. Extract ZIP file into your Interface/AddOns/BetterCharacterStats folder, remove ``-main``
 3. Restart the game
  
 ## Thanks to original author and all contributors

@@ -1112,7 +1112,10 @@ local function ScanAllAuras()
 		local index = GetPlayerBuff(i, "HELPFUL")
 		if index > -1 then
 			-- Cache icon/stacks for buffs we need later (avoids re-looping)
-			local icon, stacks = UnitBuff("player", i)
+			-- Keep text, icon and stacks on the same native player-buff slot.
+			-- GetPlayerBuff's zero-based ordinal is not a UnitBuff ordinal.
+			local icon = GetPlayerBuffTexture(index)
+			local stacks = GetPlayerBuffApplications(index)
 			if icon then
 				if icon == "Interface\\Icons\\Spell_Holy_CrusaderStrike" then
 					AuraCache.zealStacks = stacks or 0
