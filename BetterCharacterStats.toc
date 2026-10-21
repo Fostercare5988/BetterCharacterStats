@@ -4,7 +4,7 @@
 ## X-ClassicAPI-Min-Version: 1.16.0
 ## Dependencies: !!!ClassicAPI
 ## X-ClassicAPI-Required-Capabilities: C_Timer.NewTimer, C_UnitAuras.GetAuraDataBySpellName
-## Title: BetterCharacterStats
+## Title: |cffff9e38BetterCharacterStats|r |cffffd6a8[Fostercare5988]|r
 ## Author: moh, Bennylava, Lexie, Spit, Pepopo, MarcelineVQ
 ## Version: 1.15.3
 ## Notes: Improved character statistics inside Character Info panel.
