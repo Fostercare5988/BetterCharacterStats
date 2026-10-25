@@ -1,7 +1,7 @@
 ## X-Website: https://github.com/Fostercare5988
 ## X-Maintainer: Fostercare5988
 ## Interface: 11200
-## X-ClassicAPI-Min-Version: 1.16.0
+## X-ClassicAPI-Min-Version: 1.17.7
 ## Dependencies: !!!ClassicAPI
 ## X-ClassicAPI-Required-Capabilities: C_Timer.NewTimer, C_UnitAuras.GetAuraDataBySpellName
 ## Title: |cffff9e38BetterCharacterStats|r |cffffd6a8[Fostercare5988]|r
