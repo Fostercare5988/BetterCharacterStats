@@ -1,7 +1,7 @@
 # BetterCharacterStats
 This addon shows your character stats that are not present in default UI.<br>
 Includes Turtle WoW custom-stat support. Custom amounts still need verification on the deployed OctoWoW content.
-Requires ClassicAPI 1.17.7 or later for aura lookup and timer APIs. Aura bursts share one deferred refresh; equipment is scanned once per statistics update. Required API checks preserve the native statistics panel when the extension is unavailable.
+Requires ClassicAPI for aura lookup and timer APIs. Aura bursts share one deferred refresh; equipment is scanned once per statistics update. Required API checks preserve the native statistics panel when the extension is unavailable.
 
 ## Features
  - Base stats: strength, agility, stamina, intellect, spirit, armor
