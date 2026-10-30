@@ -38,7 +38,6 @@ setmetatable(BCScache["skills"], defaultToZero)
 local SetBonus = {
 	hit = {},
 	spellHit = {},
-	rangedCrit = {},
 	spellCrit = {},
 	spellCritClass = {},
 	spellPower = {},
@@ -75,7 +74,6 @@ local function ScanAllGear()
 	-- Reset set bonuses
 	twipe(SetBonus.hit)
 	twipe(SetBonus.spellHit)
-	twipe(SetBonus.rangedCrit)
 	twipe(SetBonus.spellCrit)
 	twipe(SetBonus.spellCritClass)
 	twipe(SetBonus.spellPower)
@@ -137,19 +135,6 @@ local function ScanAllGear()
 								_, _, value = strfind(text, L["+(%d)%% Ranged Hit"])
 								if value then cached.ranged_hit = (cached.ranged_hit or 0) + tonumber(value) end
 							end
-
-							-- ===== RANGED CRIT =====
-							_, _, value = strfind(text, L["Equip: Improves your chance to get a critical strike by (%d)%%."])
-							if value then cached.ranged_crit = (cached.ranged_crit or 0) + tonumber(value) end
-
-							_, _, value = strfind(text, L["Equip: Improves your chance to get a critical strike with missile weapons by (%d)%%."])
-							if value then cached.ranged_crit = (cached.ranged_crit or 0) + tonumber(value) end
-
-							_, _, value = strfind(text, L["%+(%d+)%% Critical Strike"])
-							if value then cached.ranged_crit = (cached.ranged_crit or 0) + tonumber(value) end
-
-							_, _, value = strfind(text, L["+(%d)%% Ranged Crit"])
-							if value then cached.ranged_crit = (cached.ranged_crit or 0) + tonumber(value) end
 
 							-- ===== SPELL CRIT =====
 							_, _, value = strfind(text, L["Equip: Improves your chance to get a critical strike with spells by (%d)%%."])
@@ -304,13 +289,6 @@ local function ScanAllGear()
 								cached.set_spell_hit_name = cached.setName
 							end
 
-							-- Set bonus: ranged crit
-							_, _, value = strfind(text, L["^Set: Improves your chance to get a critical strike by (%d)%%."])
-							if value and cached.setName then
-								cached.set_ranged_crit = tonumber(value)
-								cached.set_ranged_crit_name = cached.setName
-							end
-
 							-- Set bonus: spell crit
 							_, _, value = strfind(text, L["^Set: Improves your chance to get a critical strike with spells by (%d)%%."])
 							if value and cached.setName then
@@ -391,7 +369,6 @@ local function ScanAllGear()
 				BCScache["gear"].hit = BCScache["gear"].hit + (cached.hit or 0)
 				BCScache["gear"].spell_hit = BCScache["gear"].spell_hit + (cached.spell_hit or 0)
 				BCScache["gear"].ranged_hit = BCScache["gear"].ranged_hit + (cached.ranged_hit or 0)
-				BCScache["gear"].ranged_crit = BCScache["gear"].ranged_crit + (cached.ranged_crit or 0)
 				BCScache["gear"].spell_crit = BCScache["gear"].spell_crit + (cached.spell_crit or 0)
 				BCScache["gear"].damage_and_healing = BCScache["gear"].damage_and_healing + (cached.damage_and_healing or 0)
 				BCScache["gear"].only_damage = BCScache["gear"].only_damage + (cached.only_damage or 0)
@@ -417,10 +394,6 @@ local function ScanAllGear()
 				if cached.set_spell_hit and cached.set_spell_hit_name and not SetBonus.spellHit[cached.set_spell_hit_name] then
 					SetBonus.spellHit[cached.set_spell_hit_name] = true
 					BCScache["gear"].spell_hit = BCScache["gear"].spell_hit + cached.set_spell_hit
-				end
-				if cached.set_ranged_crit and cached.set_ranged_crit_name and not SetBonus.rangedCrit[cached.set_ranged_crit_name] then
-					SetBonus.rangedCrit[cached.set_ranged_crit_name] = true
-					BCScache["gear"].ranged_crit = BCScache["gear"].ranged_crit + cached.set_ranged_crit
 				end
 				if cached.set_spell_crit and cached.set_spell_crit_name and not SetBonus.spellCrit[cached.set_spell_crit_name] then
 					SetBonus.spellCrit[cached.set_spell_crit_name] = true
@@ -598,15 +571,6 @@ local function ScanAllTalents()
 						-- Warlock Suppression
 						_, _, value = strfind(text, L["Reduces the chance for enemies to resist your Affliction spells by (%d+)%%."])
 						if value then BCScache["talents"].spell_hit_shadow = BCScache["talents"].spell_hit_shadow + tonumber(value) end
-
-						-- ===== RANGED CRIT =====
-						-- Hunter Lethal Shots
-						_, _, value = strfind(text, L["Increases your critical strike chance with ranged weapons by (%d)%%."])
-						if value then BCScache["talents"].ranged_crit = BCScache["talents"].ranged_crit + tonumber(value) end
-
-						-- Hunter Killer Instinct
-						_, _, value = strfind(text, L["Increases your critical strike chance with all attacks by (%d)%%."])
-						if value then BCScache["talents"].ranged_crit = BCScache["talents"].ranged_crit + tonumber(value) end
 
 						-- ===== SPELL CRIT =====
 						-- Mage Arcane Instability
@@ -800,28 +764,16 @@ local function ParseBuffText(text)
 	_, _, value = strfind(text, L["Increases your chance to hit with spells by (%d+)%%"])
 	if value then result.spell_hit = (result.spell_hit or 0) + tonumber(value); found = true end
 
-	-- ===== RANGED CRIT =====
 	if strfind(text, L["Increases critical chance of spells by 10%%, melee and ranged by 5%% and grants 140 attack power. 120 minute duration."]) then
-		result.ranged_crit = (result.ranged_crit or 0) + 5
 		result.spell_crit = (result.spell_crit or 0) + 10
 		found = true
 	end
 
-	_, _, value = strfind(text, L["Agility increased by 25, Critical hit chance increases by (%d)%%."])
-	if value then result.ranged_crit = (result.ranged_crit or 0) + tonumber(value); found = true end
-
 	_, _, value = strfind(text, L["Increases chance for a melee, ranged, or spell critical by (%d+)%% and all attributes by %d+."])
 	if value then
-		result.ranged_crit = (result.ranged_crit or 0) + tonumber(value)
 		result.spell_crit = (result.spell_crit or 0) + tonumber(value)
 		found = true
 	end
-
-	_, _, value = strfind(text, L["Critical strike chance increased by (%d+)%%."])
-	if value then result.ranged_crit = (result.ranged_crit or 0) + tonumber(value); found = true end
-
-	_, _, value = strfind(text, L["Increases ranged and melee critical chance by (%d+)%%."])
-	if value then result.ranged_crit = (result.ranged_crit or 0) + tonumber(value); found = true end
 
 	-- ===== SPELL CRIT =====
 	_, _, value = strfind(text, L["Chance for a critical hit with a spell increased by (%d+)%%."])
@@ -1033,7 +985,6 @@ local function ApplyBuffStats(stats, count)
 	-- Direct stat additions (multiplied by count)
 	if stats.hit then BCScache["auras"].hit = BCScache["auras"].hit + stats.hit * count end
 	if stats.spell_hit then BCScache["auras"].spell_hit = BCScache["auras"].spell_hit + stats.spell_hit * count end
-	if stats.ranged_crit then BCScache["auras"].ranged_crit = BCScache["auras"].ranged_crit + stats.ranged_crit * count end
 	if stats.spell_crit then BCScache["auras"].spell_crit = BCScache["auras"].spell_crit + stats.spell_crit * count end
 	if stats.only_damage then BCScache["auras"].only_damage = BCScache["auras"].only_damage + stats.only_damage * count end
 	if stats.damage_and_healing then BCScache["auras"].damage_and_healing = BCScache["auras"].damage_and_healing + stats.damage_and_healing * count end
@@ -1367,79 +1318,6 @@ function BCS:GetSpellHitRating()
 	local hit_shadow = BCScache["talents"].spell_hit_shadow
 	local hit_holy = BCScache["talents"].spell_hit_holy
 	return hit, hit_fire, hit_frost, hit_arcane, hit_shadow, hit_holy
-end
-
-function BCS:GetCritChance()
-	local crit = 0
-	-- Spellbook
-	for tab = 1, GetNumSpellTabs() do
-		local _, _, offset, numSpells = GetSpellTabInfo(tab)
-		for spell = 1, numSpells do
-			local currentPage = ceil(spell / SPELLS_PER_PAGE)
-			local SpellID = spell + offset + (SPELLS_PER_PAGE * (currentPage - 1))
-			BCS_Tooltip:SetSpell(SpellID, BOOKTYPE_SPELL)
-			for line = 1, BCS_Tooltip:NumLines() do
-				local left = _G[BCS_Prefix .. "TextLeft" .. line]
-				local text = left:GetText()
-				if text then
-					local _, _, value = strfind(text, L["([%d.]+)%% chance to crit"])
-					if value then
-						crit = crit + tonumber(value)
-						break
-					end
-				end
-			end
-		end
-	end
-
-	return crit
-end
-
-function BCS:GetRangedCritChance()
-	-- All scanning now done by ScanAllGear/ScanAllTalents/ScanAllAuras
-	-- values from vmangos core
-	local crit = 0
-	local _, agility = UnitStat("player", 2)
-	local vallvl1 = 0
-	local vallvl60 = 0
-	local classrate = 0
-
-	if playerClass == "MAGE" then
-		vallvl1 = 12.9
-		vallvl60 = 20
-	elseif playerClass == "ROGUE" then
-		vallvl1 = 2.2
-		vallvl60 = 29
-	elseif playerClass == "HUNTER" then
-		vallvl1 = 3.5
-		vallvl60 = 53
-	elseif playerClass == "PRIEST" then
-		vallvl1 = 11
-		vallvl60 = 20
-	elseif playerClass == "WARLOCK" then
-		vallvl1 = 8.4
-		vallvl60 = 20
-	elseif playerClass == "WARRIOR" then
-		vallvl1 = 3.9
-		vallvl60 = 20
-	else
-		return crit
-	end
-
-	classrate = vallvl1 * (60 - UnitLevel("player")) / 59 + vallvl60 * (UnitLevel("player") - 1) / 59
-	crit = agility / classrate
-
-	if playerClass == "MAGE" then
-		crit = crit + 3.2
-	elseif playerClass == "PRIEST" then
-		crit = crit + 3
-	elseif playerClass == "WARLOCK" then
-		crit = crit + 2
-	end
-
-	crit = crit + BCScache["gear"].ranged_crit + BCScache["talents"].ranged_crit + BCScache["auras"].ranged_crit
-
-	return crit
 end
 
 function BCS:GetSpellCritChance()

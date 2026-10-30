@@ -782,7 +782,7 @@ function BCS:SetMeleeCritChance(statFrame)
 	local label = _G[statFrame:GetName() .. "Label"]
 
 	label:SetText(L.MELEE_CRIT_COLON)
-	text:SetText(format("%.2f%%", BCS:GetCritChance()))
+	text:SetText(format("%.2f%%", GetCritChance()))
 
 	statFrame.tooltip = L.MELEE_CRIT_TOOLTIP
 	statFrame.tooltipSubtext = L.MELEE_CRIT_TOOLTIP_SUB
@@ -910,7 +910,7 @@ function BCS:SetEffectiveBossCrit(statFrame)
 	local label = getglobal(statFrame:GetName() .. "Label")
 	label:SetText(L.BOSS_CRIT_COLON)
 
-	local critChance = BCS:GetCritChance() - 3 -- 3 % crit reduction vs lvl 63
+	local critChance = GetCritChance() - 3 -- 3 % crit reduction vs lvl 63
 	if OffhandHasWeapon() == 1 then
 		text:SetText(format("%.1f%% | %.1f%%",
 				math.min(critChance, BCS:GetDualWieldCritCap(BCS:GetMHWeaponSkill())),
@@ -1076,7 +1076,7 @@ function BCS:SetRangedCritChance(statFrame)
 		return
 	end
 
-	local crit = BCS:GetRangedCritChance()
+	local crit = GetRangedCritChance()
 	-- apply skill difference modifier
 	local skill = BCS:GetRangedWeaponSkill()
 	local level = UnitLevel("player")
